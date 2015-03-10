@@ -1,7 +1,3 @@
-import scala.collection.{ mutable => scm, immutable => sci }
-import java.nio.{ file => jnf }
-import psp._, std._, api._, pio._, jvm._, cache._
-import StdEq._, StdShow._
-import psp.std.repl.ReplImport._
-
-def int20  = 1 to 20 map (x => printResult(s"> $x")(x))
+java.lang.System.err.println("// Paste this into ammonite.")
+java.lang.System.err.println("import psp._, std._, api._, repl._, pio._, StdShow._, StdEq._\n")
+ammonite.repl.Repl main null

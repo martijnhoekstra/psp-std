@@ -14,6 +14,7 @@ object Build extends sbt.Build {
   def commonArgs = wordSeq("-Yno-predef -Yno-adapted-args -unchecked")
   def stdArgs    = "-Yno-imports" +: commonArgs
   def replArgs   = "-language:_" +: commonArgs
+  def ammonite   =  "com.lihaoyi" %% "ammonite-repl" % "0.2.7"
 
   def rootResourceDir: SettingOf[File] = resourceDirectory in Compile in LocalRootProject
   def subprojects                      = List[sbt.Project](api, dmz, std, pio, dev, jvm, scalac)
@@ -90,7 +91,7 @@ object Build extends sbt.Build {
 
   lazy val api    = project setup "psp's non-standard api"
   lazy val dmz    = project setup "psp's non-standard dmz"
-  lazy val std    = project setup "psp's non-standard standard library" dependsOn (api, dmz) also (guava, spire, jsr305)
+  lazy val std    = project setup "psp's non-standard standard library" dependsOn (api, dmz) also (guava, spire, jsr305, ammonite)
   lazy val pio    = project setup "psp's non-standard io library" dependsOn std
   lazy val jvm    = project.usesCompiler.usesParsers setup "psp's non-standard jvm code" dependsOn pio
   lazy val dev    = project setup "psp's non-standard unstable code" dependsOn std also (javaSysMon, squants, okhttp)
@@ -109,12 +110,17 @@ object Build extends sbt.Build {
   // A console project which pulls in misc additional dependencies currently being explored.
   // Removing all scalac options except the ones listed here, to eliminate all the warnings
   // repl startup code in resources/initialCommands.scala
-  lazy val consoleOnly = project.helper.usesCompiler.alsoToolsJar dependsOn (testOnly % "test->test") dependsOn (classpathDeps: _*) also (guava, jsr305) settings (
-                    libraryDependencies <+=  scalaCompiler,
-    scalacOptions in (Compile, console)  :=  replArgs,
-       scalacOptions in (Test, console)  :=  replArgs,
-                           key.initRepl <+=  resourceDirectory in Compile mapValue (d => IO.read(d / "initialCommands.scala")),
-                   key.initRepl in Test  +=  "\nimport org.scalacheck._, Prop._, Gen._\nimport psp.tests._"
+  lazy val consoleOnly = (
+    project.helper.usesCompiler.alsoToolsJar
+    dependsOn (testOnly % "test->test")
+    dependsOn (classpathDeps: _*)
+    also (guava, jsr305, ammonite) settings (
+                      libraryDependencies <+=  scalaCompiler,
+      scalacOptions in (Compile, console)  :=  replArgs,
+         scalacOptions in (Test, console)  :=  replArgs,
+                             key.initRepl <+=  resourceDirectory in Compile mapValue (d => IO.read(d / "initialCommands.scala")),
+                     key.initRepl in Test  +=  "\nimport org.scalacheck._, Prop._, Gen._\nimport psp.tests._"
+    )
   )
 
   def testDependencies = Def setting Seq(
