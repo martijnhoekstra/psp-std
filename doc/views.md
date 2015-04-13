@@ -94,7 +94,7 @@ res0: String = 1, 2, 3
 scala> val xs = (Stream from 1).view
 xs: scala.collection.immutable.StreamView[Int,scala.collection.immutable.Stream[Int]] = StreamView(...)
 
-// Alas poor StreamView... I knew him well.
+// Alas poor StreamView... I knew him
 scala> xs dropRight 1000 take 3 mkString ", "
 [... time passes ...]
 java.lang.OutOfMemoryError: Java heap space
